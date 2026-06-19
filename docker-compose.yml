@@ -1,0 +1,77 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Interseguro Coding Challenge — Docker Compose
+#
+# Services:
+#   go-api     → Go + Fiber  (QR factorization) : port 3000
+#   node-api   → Node + Express (statistics)     : port 4000
+#   frontend   → Next.js 14 (UI)                 : port 3001
+#
+# Flow: frontend → go-api → node-api
+# ─────────────────────────────────────────────────────────────────────────────
+
+networks:
+  interseguro-net:
+    driver: bridge
+
+services:
+  # ── Go API ────────────────────────────────────────────────────────────────
+  go-api:
+    build:
+      context: ./go-api
+      dockerfile: Dockerfile
+    container_name: interseguro-go-api
+    restart: unless-stopped
+    environment:
+      PORT: "3000"
+      JWT_SECRET: ${JWT_SECRET:-super-secret-key}
+      NODE_API_URL: http://node-api:4000
+    ports:
+      - "3000:3000"
+    networks:
+      - interseguro-net
+    depends_on:
+      - node-api
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── Node.js API ───────────────────────────────────────────────────────────
+  node-api:
+    build:
+      context: ./node-api
+      dockerfile: Dockerfile
+    container_name: interseguro-node-api
+    restart: unless-stopped
+    environment:
+      PORT: "4000"
+    ports:
+      - "4000:4000"
+    networks:
+      - interseguro-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── Frontend ──────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_GO_API_URL: http://localhost:3000
+    container_name: interseguro-frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_GO_API_URL: http://localhost:3000
+    ports:
+      - "3001:3001"
+    networks:
+      - interseguro-net
+    depends_on:
+      - go-api
