@@ -3,20 +3,17 @@ FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies first (layer cache)
-COPY go.mod go.sum ./
-RUN go mod download
-
-# Copy source and build
+# Copy everything first, then run tidy+build in one step
+# (go mod tidy needs the source to resolve all imports)
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o /go-api ./cmd/server
+RUN go mod tidy && \
+    CGO_ENABLED=0 GOOS=linux go build -o /go-api ./cmd/server
 
 # ── Stage 2: Runtime ─────────────────────────────────────────────────────────
 FROM alpine:3.19
 
 WORKDIR /app
 
-# Add CA certs for HTTPS calls to Node API
 RUN apk --no-cache add ca-certificates
 
 COPY --from=builder /go-api .

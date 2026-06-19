@@ -4,7 +4,7 @@
   "description": "Statistics microservice for QR matrix data — Interseguro Coding Challenge",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node src/infrastructure/server.js",
     "dev": "nodemon src/index.js",
     "test": "jest --coverage",
     "test:watch": "jest --watch"

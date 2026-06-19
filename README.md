@@ -66,7 +66,8 @@ infrastructure → adapters → usecases → domain
 ```
 interseguro-challenge/
 ├── docker-compose.yml
-├── AGENTS.md                        ← instrucciones para agentes de IA
+├── AGENTS.md                        ← instrucciones globales para agentes de IA
+├── AI-TOOLING.md                    ← frameworks de IA, SDD, Open Specs (requerido por el challenge)
 ├── go-api/
 │   ├── SPEC.md                      ← spec del servicio para agentes de IA
 │   ├── cmd/server/main.go

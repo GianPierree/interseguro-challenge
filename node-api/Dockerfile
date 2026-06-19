@@ -3,7 +3,7 @@ FROM node:20-alpine AS deps
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install --only=production
 
 # ── Stage 2: Runtime ──────────────────────────────────────────────────────────
 FROM node:20-alpine
@@ -15,4 +15,4 @@ COPY . .
 
 EXPOSE 4000
 
-CMD ["node", "src/index.js"]
+CMD ["node", "src/infrastructure/server.js"]
